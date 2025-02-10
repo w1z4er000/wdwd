@@ -1,0 +1,220 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player.PlayerGui
+
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 400, 0, 400)
+panel.Position = UDim2.new(0.5, -200, 0.5, -200)
+panel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+panel.Visible = true
+panel.Parent = screenGui
+
+local isCollapsed = false
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(0.5, -15, 0, -15)
+toggleButton.Text = "-"
+toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+toggleButton.Parent = panel
+
+local espButton = Instance.new("TextButton")
+espButton.Size = UDim2.new(0, 100, 0, 50)
+espButton.Position = UDim2.new(0.5, -50, 0, 50)
+espButton.Text = "ESP Players"
+espButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+espButton.Parent = panel
+
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0, 100, 0, 50)
+speedInput.Position = UDim2.new(0.5, -50, 0, 110)
+speedInput.Text = "Введите скорость"
+speedInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.Parent = panel
+
+local speedButton = Instance.new("TextButton")
+speedButton.Size = UDim2.new(0, 100, 0, 50)
+speedButton.Position = UDim2.new(0.5, -50, 0, 170)
+speedButton.Text = "Изменить скорость"
+speedButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+speedButton.Parent = panel
+
+local jumpInput = Instance.new("TextBox")
+jumpInput.Size = UDim2.new(0, 100, 0, 50)
+jumpInput.Position = UDim2.new(0.5, -50, 0, 230)
+jumpInput.Text = "Введите высоту"
+jumpInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+jumpInput.Parent = panel
+
+local jumpButton = Instance.new("TextButton")
+jumpButton.Size = UDim2.new(0, 100, 0, 50)
+jumpButton.Position = UDim2.new(0.5, -50, 0, 290)
+jumpButton.Text = "Изменить прыжок"
+jumpButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+jumpButton.Parent = panel
+
+local rejoinButton = Instance.new("TextButton")
+rejoinButton.Size = UDim2.new(0, 150, 0, 50)
+rejoinButton.Position = UDim2.new(0.5, -75, 0, 350)
+rejoinButton.Text = "Rejoin Server"
+rejoinButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+rejoinButton.Parent = panel
+
+local function rejoinServer()
+    local placeId = game.PlaceId
+    TeleportService:Teleport(placeId, player)
+end
+
+rejoinButton.MouseButton1Click:Connect(rejoinServer)
+
+local function toggleESP()
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= player then
+            local highlight = Instance.new("Highlight")
+            highlight.Adornee = v.Character or v.CharacterAdded:Wait()
+            highlight.Parent = v.Character or v.CharacterAdded:Wait()
+            highlight.Enabled = not highlight.Enabled
+        end
+    end
+end
+
+espButton.MouseButton1Click:Connect(toggleESP)
+
+local function changeSpeed()
+    local speedValue = tonumber(speedInput.Text)
+    if speedValue then
+        player.Character.Humanoid.WalkSpeed = speedValue
+    else
+        warn("Введите корректное число для скорости.")
+    end
+end
+
+speedButton.MouseButton1Click:Connect(changeSpeed)
+
+local function changeJumpHeight()
+    local jumpValue = tonumber(jumpInput.Text)
+    if jumpValue then
+        player.Character.Humanoid.JumpPower = jumpValue
+    else
+        warn("Введите корректное число для высоты прыжка.")
+    end
+end
+
+jumpButton.MouseButton1Click:Connect(changeJumpHeight)
+
+local function showPanel()
+    panel.Visible = true
+    toggleButton.Text = "-"
+end
+
+local function hidePanel()
+    panel.Visible = false
+    toggleButton.Text = "+"
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+    if isCollapsed then
+        showPanel()
+        isCollapsed = false
+    else
+        hidePanel()
+        isCollapsed = true
+
+        
+        local miniPanel = Instance.new("Frame")
+        miniPanel.Size = UDim2.new(0, 100, 0, 50)
+        miniPanel.Position = UDim2.new(0.5, -50, 0.5, -25)
+        miniPanel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        miniPanel.Parent = screenGui
+
+        local miniLabel = Instance.new("TextLabel")
+        miniLabel.Size = UDim2.new(1, 0, 1, 0)
+        miniLabel.Position = UDim2.new(0, 0, 0, 0)
+        miniLabel.Text = "t.me/w1z4erscript"
+        miniLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        miniLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+        miniLabel.Parent = miniPanel
+
+        local miniToggleButton = Instance.new("TextButton")
+        miniToggleButton.Size = UDim2.new(0, 100, 0, 50)
+        miniToggleButton.Position = UDim2.new(0.5, -50, 0, 0)
+        miniToggleButton.Text = "+"
+        miniToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        miniToggleButton.Parent = miniPanel
+
+        miniToggleButton.MouseButton1Click:Connect(function()
+            miniPanel:Destroy() 
+            showPanel()        
+            isCollapsed = false  
+        end)
+
+       
+        local dragging = false
+        local dragInput
+        local startPos
+        local startPosMouse
+
+        local function beginDrag(input)
+            dragging = true
+            dragInput = input
+            startPos = miniPanel.Position
+            startPosMouse = input.Position
+        end
+
+        miniPanel.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                beginDrag(input)
+            end
+        end)
+
+        miniPanel.InputEnded:Connect(function(input)
+            if input == dragInput then
+                dragging = false
+                dragInput = nil
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging then
+                local delta = input.Position - startPosMouse
+                miniPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+
+    end
+end)
+
+local dragging = false
+local dragInput
+local startPos
+local startPosMouse
+
+local function beginDrag(input)
+    dragging = true
+    dragInput = input
+    startPos = panel.Position
+    startPosMouse = input.Position
+end
+
+panel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginDrag(input)
+    end
+end)
+
+panel.InputEnded:Connect(function(input)
+    if input == dragInput then
+        dragging = false
+        dragInput = nil
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging then
+        local delta = input.Position - startPosMouse
+        panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
